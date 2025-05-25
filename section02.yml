@@ -1,0 +1,1486 @@
+---
+
+- name: "2.2.1 Ensure Access Credential Manager as a trusted caller is set to No One"
+  when: 
+    - rule_2_2_1
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeTrustedCredManAccessPrivilege
+    users: []
+    action: set
+
+- name: "2.2.2 Ensure Access this computer from the network is set to Administrators, Authenticated Users, & ENTERPRISE DOMAIN CONTROLLERS DC only | Domain Controller"
+  when:
+    - rule_2_2_2
+    - is_domain_controller
+
+  ansible.windows.win_user_right:
+    name: SeNetworkLogonRight
+    users:
+      - Administrators
+      - Authenticated Users
+      - ENTERPRISE DOMAIN CONTROLLERS
+    action: set
+
+- name: "2.2.3 Ensure Access this computer from the network is set to Administrators, Authenticated Users, & ENTERPRISE DOMAIN CONTROLLERS MS only | Member Server"
+  when:
+    - rule_2_2_3
+    - is_domain_member
+
+  ansible.windows.win_user_right:
+    name: SeNetworkLogonRight
+    users:
+      - Administrators
+      - Authenticated Users
+    action: set
+
+- name: "2.2.4 Ensure Act as part of the operating system is set to No One"
+  when: 
+    - rule_2_2_4
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeTcbPrivilege
+    users: []
+    action: set
+
+- name: "2.2.5 Ensure Add workstations to domain is set to Administrators DC only | Domain Controller"
+  when:
+    - rule_2_2_5
+    - is_domain_controller
+
+  ansible.windows.win_user_right:
+    name: SeMachineAccountPrivilege
+    users: Administrators
+    action: set
+
+- name: "2.2.6 Ensure Adjust memory quotas for a process is set to Administrators LOCAL SERVICE NETWORK SERVICE"
+  when: 
+    - rule_2_2_6
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeIncreaseQuotaPrivilege
+    users:
+      - Administrators
+      - LOCAL SERVICE
+      - NETWORK SERVICE
+    action: set
+
+- name: "2.2.7 Ensure Allow log on locally is set to Administrators, ENTERPRISE DOMAIN CONTROLLERS (DC only)"
+  when:
+    - rule_2_2_7
+    - is_domain_controller
+
+  ansible.windows.win_user_right:
+    name: SeInteractiveLogonRight
+    users:
+      - Administrators
+      - ENTERPRISE DOMAIN CONTROLLERS
+    action: set
+
+- name: "2.2.8 Ensure Allow log on locally is set to Administrators (MS only)"
+  when:
+    - rule_2_2_8
+    - is_domain_member
+
+  ansible.windows.win_user_right:
+    name: SeInteractiveLogonRight
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.9 Ensure 'Allow log on through Remote Desktop Services' is set to 'Administrators' (DC only)"
+  when:
+    - rule_2_2_9
+    - is_domain_controller
+
+  ansible.windows.win_user_right:
+    name: SeRemoteInteractiveLogonRight
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.10 Ensure 'Allow log on through Remote Desktop Services' is set to 'Administrators, Remote Desktop Users' (MS Only)"
+  when:
+    - rule_2_2_10
+    - is_domain_member
+
+  ansible.windows.win_user_right:
+    name: SeRemoteInteractiveLogonRight
+    users:
+      - Administrators
+      - Remote Desktop Users
+    action: set
+
+- name: "2.2.11 Ensure Back up files and directories is set to Administrators"
+  when:
+    - rule_2_2_11
+    - is_domain_member
+
+  ansible.windows.win_user_right:
+    name: SeBackupPrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.12 Ensure Change the system time is set to Administrators LOCAL SERVICE"
+  when: 
+    - rule_2_2_12
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeSystemTimePrivilege
+    users:
+      - Administrators
+      - LOCAL SERVICE
+    action: set
+
+- name: "2.2.13 Ensure Change the time zone is set to Administrators LOCAL SERVICE"
+  when: 
+    - rule_2_2_13
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeTimeZonePrivilege
+    users:
+      - Administrators
+      - LOCAL SERVICE
+    action: set
+
+- name: "2.2.14 Ensure Create a pagefile is set to Administrators"
+  when: 
+    - rule_2_2_14
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeCreatePagefilePrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.15 Ensure Create a token object is set to No One"
+  when: 
+    - rule_2_2_15
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeCreateTokenPrivilege
+    users: []
+    action: set
+
+- name: "2.2.16 Ensure Create global objects is set to Administrators LOCAL SERVICE NETWORK SERVICE SERVICE"
+  when: 
+    - rule_2_2_16
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeCreateGlobalPrivilege
+    users:
+      - Administrators
+      - LOCAL SERVICE
+      - NETWORK SERVICE
+      - SERVICE
+    action: set
+
+- name: "2.2.17 Ensure Create permanent shared objects is set to No One"
+  when: 
+    - rule_2_2_17
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeCreatePermanentPrivilege
+    users: []
+    action: set
+
+- name: "2.2.18 Ensure Create symbolic links is set to Administrators DC only | Domain Controller"
+  when:
+    - rule_2_2_18
+    - is_domain_controller
+
+  ansible.windows.win_user_right:
+    name: SeCreateSymbolicLinkPrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.19 Ensure Create symbolic links is set to Administrators NT VIRTUAL MACHINE-Virtual Machines MS only | Member Server"
+  when:
+    - rule_2_2_19
+    - is_domain_member
+
+  block:
+    - name: "2.2.19 Ensure Create symbolic links is set to Administrators NT VIRTUAL MACHINE-Virtual Machines  |  Without Hyper-v | Member Server"
+      when: not win22cis_hyperv_installed
+      ansible.windows.win_user_right:
+        name: SeCreateSymbolicLinkPrivilege
+        users:
+          - Administrators
+        action: set
+
+    - name: "2.2.19 Ensure Create symbolic links is set to Administrators NT VIRTUAL MACHINE-Virtual Machines MS only | With Hyper-v | Member Server"
+      when: win22cis_hyperv_installed
+      ansible.windows.win_user_right:
+        name: SeCreateSymbolicLinkPrivilege
+        users:
+          - Administrators
+          - NT VIRTUAL MACHINE\Virtual Machines
+        action: set
+
+- name: "2.2.20 Ensure Debug programs is set to Administrators"
+  when: 
+    - rule_2_2_20
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeDebugPrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.21 Ensure Deny access to this computer from the network to include Guests DC only | Domain Controller"
+  when:
+    - rule_2_2_21
+    - is_domain_controller
+    - not win_skip_for_test
+
+  ansible.windows.win_user_right:
+    name: SeDenyNetworkLogonRight
+    users:
+      - Guests
+    action: add
+
+- name: "2.2.22 Ensure Deny access to this computer from the network to include Guests Local account and member of Administrators group MS only | Member Server"
+  when:
+    - rule_2_2_22
+    - is_domain_member
+
+  ansible.windows.win_user_right:
+    name: SeDenyNetworkLogonRight
+    users:
+      - Guests
+      - Local Account
+      - Administrators
+    action: add
+
+- name: "2.2.23 Ensure Deny log on as a batch job to include Guests"
+  when: 
+    - rule_2_2_23
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeDenyBatchLogonRight
+    users:
+      - Guests
+    action: set
+
+- name: "2.2.24 Ensure Deny log on as a service to include Guests"
+  when: 
+    - rule_2_2_24
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeDenyServiceLogonRight
+    users:
+      - Guests
+    action: set
+
+- name: "2.2.25 Ensure Deny log on locally to include Guests"
+  when: 
+    - rule_2_2_25
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeDenyInteractiveLogonRight
+    users:
+      - Guests
+    action: set
+
+- name: "2.2.26 Ensure Deny log on through Remote Desktop Services to include Guests DC only | Domain Controller"
+  when:
+    - rule_2_2_26
+    - is_domain_controller
+    - not win_skip_for_test
+
+  ansible.windows.win_user_right:
+    name: SeDenyRemoteInteractiveLogonRight
+    users:
+      - Guests
+    action: set
+
+- name: "2.2.27 Ensure Deny log on through Remote Desktop Services is set to Guests Local account MS only | Member Server"
+  when:
+    - rule_2_2_27
+    - is_domain_member
+    - not win_skip_for_test
+
+  ansible.windows.win_user_right:
+    name: SeDenyRemoteInteractiveLogonRight
+    users:
+      - Guests
+      - Local Account
+    action: set
+
+- name: "2.2.28 Ensure Enable computer and user accounts to be trusted for delegation is set to Administrators DC only | Domain Controller"
+  when:
+    - rule_2_2_28
+    - is_domain_controller
+
+  ansible.windows.win_user_right:
+    name: SeEnableDelegationPrivilege
+    users: Administrators
+    action: set
+
+- name: "2.2.29 Ensure Enable computer and user accounts to be trusted for delegation is set to No One MS only | Member Server"
+  when:
+    - rule_2_2_29
+    - is_domain_member
+
+  ansible.windows.win_user_right:
+    name: SeEnableDelegationPrivilege
+    users: []
+    action: set
+
+- name: "2.2.30 Ensure Force shutdown from a remote system is set to Administrators"
+  when: 
+    - rule_2_2_30
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeRemoteShutdownPrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.31 Ensure Generate security audits is set to LOCAL SERVICE, NETWORK SERVICE"
+  when: 
+    - rule_2_2_31
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeAuditPrivilege
+    users:
+      - LOCAL SERVICE
+      - NETWORK SERVICE
+    action: set
+
+- name: "2.2.32 Ensure Impersonate a client after authentication is set to Administrators LOCAL SERVICE NETWORK SERVICE SERVICE DC only | Domain Controller"
+  when:
+    - rule_2_2_32
+    - is_domain_controller
+
+  ansible.windows.win_user_right:
+    name: SeImpersonatePrivilege
+    users:
+      - Administrators
+      - LOCAL SERVICE
+      - NETWORK SERVICE
+      - SERVICE
+    action: set
+
+- name: "2.2.33 Ensure Impersonate a client after authentication is set to Administrators LOCAL SERVICE, NETWORK SERVICE, SERVICE and when the Web Server IIS Role with Web Services Role Service is installed IIS IUSRS MS only"
+  when:
+    - rule_2_2_33
+    - is_domain_member
+# deteck 
+  block:
+    - name: "2.2.33 Ensure Impersonate a client after authentication is set to Administrators LOCAL SERVICE, NETWORK SERVICE, SERVICE and when the Web Server IIS Role with Web Services Role Service is installed IIS IUSRS MS only"
+      when: not win22cis_iis_and_web_services_installed
+      ansible.windows.win_user_right:
+        name: SeImpersonatePrivilege
+        users:
+          - Administrators
+          - LOCAL SERVICE
+          - NETWORK SERVICE
+          - SERVICE
+        action: set
+
+    - name: "2.2.33 Ensure Impersonate a client after authentication is set to Administrators LOCAL SERVICE, NETWORK SERVICE, SERVICE and when the Web Server IIS Role with Web Services Role Service is installed IIS IUSRS MS only"
+      when: win22cis_iis_and_web_services_installed
+      ansible.windows.win_user_right:
+        name: SeImpersonatePrivilege
+        users:
+          - Administrators
+          - IIS_IUSRS
+          - LOCAL SERVICE
+          - NETWORK SERVICE
+          - SERVICE
+        action: set
+
+- name: "2.2.34 Ensure Increase scheduling priority is set to Administrators Window ManagerWindow Manager Group"
+  when: 
+    - rule_2_2_34
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeIncreaseBasePriorityPrivilege
+    users: "{{ win22cis_increase_scheduling_priority_users }}"
+    action: set
+
+- name: "2.2.35 Ensure Load and unload device drivers is set to Administrators"
+  when: 
+    - rule_2_2_35
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeLoadDriverPrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.36 Ensure Lock pages in memory is set to No One"
+  when: 
+    - rule_2_2_36
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeLockMemoryPrivilege
+    users: []
+    action: set
+
+- name: "2.2.37 Ensure Log on as a batch job is set to Administrators DC Only | Domain Controller"
+  when:
+    - rule_2_2_37
+    - is_domain_controller
+
+  ansible.windows.win_user_right:
+    name: SeBatchLogonRight
+    users: Administrators
+    action: set
+
+- name: "2.2.38 Ensure Manage auditing and security log is set to Administrators and when Exchange is running in the environment Exchange Servers DC only | Domain Controller"
+  when:
+    - rule_2_2_38
+    - is_domain_controller
+
+  block:
+    - name: "2.2.38 Ensure Manage auditing and security log is set to Administrators and when Exchange is running in the environment Exchange Servers DC only | Set Non-Exchange Server Groups | Domain Controller"
+      when: not win22cis_exchange_server_running
+      ansible.windows.win_user_right:
+        name: SeSecurityPrivilege
+        users:
+          - Administrators
+        action: set
+
+    - name: "2.2.38 Ensure Manage auditing and security log is set to Administrators and when Exchange is running in the environment Exchange Servers DC only | Set Exchange Server Groups | Domain Controller"
+      when: win22cis_exchange_server_running
+      ansible.windows.win_user_right:
+        name: SeSecurityPrivilege
+        users:
+          - Administrators
+          - Exchange Servers
+        action: set
+
+- name: "2.2.39 Ensure 'Manage auditing and security log' is set to 'Administrators' (MS only) | Member Server"
+  when:
+    - rule_2_2_39
+    - is_domain_member
+
+  ansible.windows.win_user_right:
+    name: SeSecurityPrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.40 Ensure Modify an object label is set to No One"
+  when: 
+    - rule_2_2_40
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeReLabelPrivilege
+    users: []
+    action: set
+
+- name: "2.2.41 Ensure Modify firmware environment values is set to Administrators"
+  when: 
+    - rule_2_2_41
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeSystemEnvironmentPrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.42 Ensure Perform volume maintenance tasks is set to Administrators"
+  when: 
+    - rule_2_2_42
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeManageVolumePrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.43 Ensure Profile single process is set to Administrators"
+  when: 
+    - rule_2_2_43
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeProfileSingleProcessPrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.44 Ensure Profile system performance is set to Administrators NT SERVICE.WdiServiceHost"
+  when: 
+    - rule_2_2_44
+    - not id_standalone
+
+  ansible.windows.win_user_right:
+    name: SeSystemProfilePrivilege
+    users:
+      - Administrators
+      - NT SERVICE\WdiServiceHost
+    action: set
+
+- name: "2.2.45 Ensure Replace a process level token is set to LOCAL SERVICE NETWORK SERVICE"
+  when: 
+    - rule_2_2_45
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeAssignPrimaryTokenPrivilege
+    users:
+      - LOCAL SERVICE
+      - NETWORK SERVICE
+    action: set
+
+- name: "2.2.46 Ensure Restore files and directories is set to Administrators"
+  when: 
+    - rule_2_2_46
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeRestorePrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.47 Ensure Shut down the system is set to Administrators"
+  when: 
+    - rule_2_2_47
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeShutdownPrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.2.48 Ensure Synchronize directory service data is set to No One DC only | Domain Controller"
+  when:
+    - rule_2_2_48
+    - is_domain_controller
+
+  ansible.windows.win_user_right:
+    name: SeSyncAgentPrivilege
+    users: []
+    action: set
+
+- name: "2.2.49 Ensure Take ownership of files or other objects is set to Administrators"
+  when: 
+    - rule_2_2_49
+    - not is_standalone
+
+  ansible.windows.win_user_right:
+    name: SeTakeOwnershipPrivilege
+    users:
+      - Administrators
+    action: set
+
+- name: "2.3.1.1 Ensure Accounts Block Microsoft accounts is set to Users can not add or log on with Microsoft accounts"
+  when: 
+    - rule_2_3_1_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: NoConnectedUser
+    data: 3
+    type: dword
+
+- name: "2.3.1.2 Ensure Accounts Guest account status is set to Disabled MS only | Member Server"
+  when:
+    - rule_2_3_1_2
+    - is_domain_member
+
+  community.windows.win_security_policy:
+    section: System Access
+    key: EnableGuestAccount
+    value: 0
+
+- name: "2.3.1.3 Ensure Accounts Limit local account use of blank passwords to console logon only is set to Enabled"
+  when: 
+    - rule_2_3_1_3
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa
+    name: LimitBlankPasswordUse
+    data: 1
+    type: dword
+
+- name: "2.3.1.4 Configure Accounts Rename administrator account"
+  when:
+    - rule_2_3_1_4
+    - not is_standalone
+    - not win_skip_for_test
+
+  block:
+    - name: "2.3.1.4 Configure Accounts Rename administrator account. | Make Changes To Admin Name."
+      when: "'adminchangethis' not in win22cis_admin_username"
+      community.windows.win_security_policy:
+        section: System Access
+        key: newadministratorname
+        value: "{{ win22cis_admin_username }}"
+
+- name: "2.3.1.5 Configure Accounts Rename guest account"
+  when: 
+    - rule_2_3_1_5
+    - not is_standalone
+  tags:
+    - level1-domaincontroller
+    - level1-memberserver
+    - rule_2.3.1.5
+
+  block:
+    - name: "2.3.1.5 Configure Accounts Rename guest account. | Make Changes To Guest Name."
+      when: "'guestchangethis' not in win22cis_guest_username"
+      community.windows.win_security_policy:
+        section: System Access
+        key: NewGuestName
+        value: "{{ win22cis_guest_username }}"
+
+- name: "2.3.2.1 Ensure Audit Force audit policy subcategory settings Windows Vista or later to override audit policy category settings is set to Enabled"
+  when: 
+    - rule_2_3_2_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: SCENoApplyLegacyAuditPolicy
+    data: 1
+    type: dword
+
+- name: "2.3.2.2 Ensure Audit Shut down system immediately if unable to log security audits is set to Disabled"
+  when: 
+    - rule_2_3_2_2
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: CrashOnAuditFail
+    data: 0
+    type: dword
+
+- name: "2.3.4.1 Ensure Devices Prevent users from installing printer drivers is set to Enabled"
+  when: 
+    - rule_2_3_4_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Print\Providers\Lanman Print Services\Servers
+    name: AddPrinterDrivers
+    data: 1
+    type: dword
+
+- name: "2.3.5.1 Ensure Domain controller Allow server operators to schedule tasks is set to Disabled DC only | Domain Controller"
+  when:
+    - rule_2_3_5_1
+    - is_domain_controller
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: SubmitControl
+    data: 0
+    type: dword
+
+# Per CIS Note: If this policy is set as prescribed, the registry key vulnerablechannelallowlist will not be present in the above registry location.
+- name: "2.3.5.2 Ensure Domain controller Allow vulnerable Netlogon secure channel connections is set to Not Configured DC only | Domain Controller"
+  when:
+    - rule_2_3_5_2
+    - is_domain_controller
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters
+    name: VulnerableChannelAllowList
+    data: 0
+    type: dword
+
+- name: "2.3.5.3 Ensure Domain controller LDAP server channel binding token requirements is set to Always DC only | Domain Controller"
+  when:
+    - rule_2_3_5_3
+    - is_domain_controller
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters
+    name: LdapEnforceChannelBinding
+    data: 2
+    type: dword
+
+- name: "2.3.5.4 Ensure Domain controller LDAP server signing requirements is set to Require signing DC only | Domain Controller"
+  when:
+    - rule_2_3_5_4
+    - is_domain_controller
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters
+    name: LDAPServerIntegrity
+    data: 2
+    type: dword
+
+- name: "2.3.5.5 Ensure Domain controller Refuse machine account password changes is set to Disabled DC only | Domain Controller"
+  when:
+    - rule_2_3_5_5
+    - is_domain_controller
+
+    
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters
+    name: RefusePasswordChange
+    data: 0
+    type: dword
+
+- name: "2.3.6.1 Ensure Domain member Digitally encrypt or sign secure channel data always is set to Enabled"
+  when:
+    - rule_2_3_6_1
+    - not ansible_windows_domain_role == "Primary domain controller"
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Netlogon\Parameters
+    name: RequireSignOrSeal
+    data: 1
+    type: dword
+
+- name: "2.3.6.2 Ensure Domain member Digitally encrypt secure channel data when possible is set to Enabled"
+  when:
+    - rule_2_3_6_2
+    - not ansible_windows_domain_role == "Primary domain controller"
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Netlogon\Parameters
+    name: SealSecureChannel
+    data: 1
+    type: dword
+
+- name: "2.3.6.3 Ensure Domain member Digitally sign secure channel data when possible is set to Enabled"
+  when:
+    - rule_2_3_6_3
+    - not ansible_windows_domain_role == "Primary domain controller"
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Netlogon\Parameters
+    name: SignSecureChannel
+    data: 1
+    type: dword
+
+- name: "2.3.6.4 Ensure Domain member Disable machine account password changes is set to Disabled"
+  when:
+    - rule_2_3_6_4
+    - not ansible_windows_domain_role == "Primary domain controller"
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Netlogon\Parameters
+    name: DisablePasswordChange
+    data: 0
+    type: dword
+
+- name: "2.3.6.5 Ensure Domain member Maximum machine account password age is set to 30 or fewer days but not 0"
+  when:
+    - rule_2_3_6_5
+    - not ansible_windows_domain_role == "Primary domain controller"
+    - not is_standalone
+
+  block:
+    - name: "2.3.6.5 Ensure Domain member Maximum machine account password age is set to 30 or fewer days but not 0. | Apply Settings To Registry."
+      community.windows.win_security_policy:
+        section: System Access
+        key: MaximumPasswordAge
+        value: "{{ win22cis_domain_member_maximum_password_age }}"
+
+- name: "2.3.6.6 Ensure Domain member Require strong Windows 2000 or later session key is set to Enabled"
+  when:
+    - rule_2_3_6_6
+    - not ansible_windows_domain_role == "Primary domain controller"
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Netlogon\Parameters
+    name: RequireStrongKey
+    data: 1
+    type: dword
+
+- name: "2.3.7.1 Ensure Interactive logon Do not require CTRL+ALT+DEL is set to Disabled"
+  when: 
+    - rule_2_3_7_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: DisableCAD
+    data: 0
+    type: dword
+
+- name: "2.3.7.2 Ensure Interactive logon Do not display last signed-in is set to Enabled"
+  when: 
+    - rule_2_3_7_2
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: DontDisplayLastUserName
+    data: 1
+    type: dword
+
+- name: "2.3.7.3 Ensure Interactive logon Machine inactivity limit is set to 900 or fewer seconds but not 0"
+  when: 
+    - rule_2_3_7_3
+    - not is_standalone
+
+  block:
+    - name: "2.3.7.3 Ensure Interactive logon Machine inactivity limit is set to 900 or fewer seconds but not 0. | Apply Settings To Registry."
+      ansible.windows.win_regedit:
+        path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+        name: InactivityTimeoutSecs
+        data: "{{ win22cis_inactivity_timeout_seconds }}"
+        type: dword
+
+- name: "2.3.7.4 Configure Interactive logon Message text for users attempting to log on"
+  when: 
+    - rule_2_3_7_4
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: LegalNoticeText
+    data: "{{ win22cis_legal_notice }}"
+    type: string
+
+- name: "2.3.7.5 Configure Interactive logon Message title for users attempting to log on"
+  when: 
+    - rule_2_3_7_5
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: LegalNoticeCaption
+    data: "{{ win22cis_legal_notice_caption }}"
+    type: string
+
+- name: "2.3.7.6 Ensure Interactive logon Number of previous logons to cache in case domain controller is not available is set to 4 or fewer logons MS only | Member Server"
+  when:
+    - rule_2_3_7_6
+    - is_domain_member
+
+  block:
+    - name: "2.3.7.6 Ensure Interactive logon Number of previous logons to cache in case domain controller is not available is set to 4 or fewer logons MS only. | Apply Settings To Registry | Member Server"
+      when: win22cis_cached_logons_count <= 4
+      ansible.windows.win_regedit:
+        path: HKLM:\SOFTWARE\Microsoft\Windows Nt\Currentversion\Winlogon
+        name: CachedLogonsCount
+        data: "{{ win22cis_cached_logons_count }}"
+        type: string
+
+
+- name: "2.3.7.7 Ensure Interactive logon Prompt user to change password before expiration is set to between 5 and 14 days"
+  when: 
+    - rule_2_3_7_7
+    - not is_standalone
+
+  block:
+    - name: "2.3.7.7 Ensure Interactive logon Prompt user to change password before expiration is set to between 5 and 14 days. | Apply Settings To Registry."
+      ansible.windows.win_regedit:
+        path: HKLM:\SOFTWARE\Microsoft\Windows Nt\Currentversion\Winlogon
+        name: PasswordExpiryWarning
+        data: "{{ win22cis_password_expiry_warning_days }}"
+        type: dword
+
+
+- name: "2.3.7.8 Ensure Interactive logon Require Domain Controller Authentication to unlock workstation is set to Enabled MS only | Member Server"
+  when:
+    - rule_2_3_7_8
+    - is_domain_member
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows Nt\Currentversion\Winlogon
+    name: ForceUnlockLogon
+    data: 1
+    type: dword
+
+- name: "2.3.7.9 Ensure Interactive logon Smart card removal behavior is set to Lock Workstation or higher."
+  when: 
+    - rule_2_3_7_9
+    - not is_standalone
+
+  block:
+    - name: "2.3.7.9 Ensure Interactive logon Smart card removal behavior is set to Lock Workstation or higher | Apply Settings To Registry."
+      ansible.windows.win_regedit:
+        path: HKLM:\SOFTWARE\Microsoft\Windows Nt\Currentversion\Winlogon
+        name: ScRemoveOption
+        data: "{{ win22cis_sc_remove_option }}"
+        type: string
+
+
+- name: "2.3.8.1 Ensure Microsoft network client Digitally sign communications always is set to Enabled"
+  when: 
+    - rule_2_3_8_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Lanmanworkstation\Parameters
+    name: RequireSecuritySignature
+    data: 1
+    type: dword
+
+- name: "2.3.8.2 Ensure Microsoft network client Digitally sign communications if server agrees is set to Enabled"
+  when: 
+    - rule_2_3_8_2
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Lanmanworkstation\Parameters
+    name: EnableSecuritySignature
+    data: 1
+    type: dword
+
+- name: "2.3.8.3 Ensure Microsoft network client Send unencrypted password to third-party SMB servers is set to Disabled"
+  when: 
+    - rule_2_3_8_3
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Lanmanworkstation\Parameters
+    name: EnablePlainTextPassword
+    data: 0
+    type: dword
+
+- name: "2.3.9.1 Ensure Microsoft network server Amount of idle time required before suspending session is set to 15 or fewer minutes."
+  when: 
+    - rule_2_3_9_1
+    - not is_standalone
+
+  block:
+    - name: "2.3.9.1 Ensure Microsoft network server Amount of idle time required before suspending session is set to 15 or fewer minutes. | Apply Settings To Registry."
+      ansible.windows.win_regedit:
+        path: HKLM:\SYSTEM\Currentcontrolset\Services\Lanmanserver\Parameters
+        name: AutoDisconnect
+        data: "{{ win22cis_smb_auto_disconnect_time }}"
+        type: dword
+
+- name: "2.3.9.2 Ensure Microsoft network server Digitally sign communications always is set to Enabled"
+  when: 
+    - rule_2_3_9_2
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Lanmanserver\Parameters
+    name: RequireSecuritySignature
+    data: 1
+    type: dword
+
+- name: "2.3.9.3 Ensure Microsoft network server Digitally sign communications if client agrees is set to Enabled"
+  when: 
+    - rule_2_3_9_3
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Lanmanserver\Parameters
+    name: EnableSecuritySignature
+    data: 1
+    type: dword
+
+- name: "2.3.9.4 Ensure Microsoft network server Disconnect clients when logon hours expire is set to Enabled"
+  when: 
+    - rule_2_3_9_4
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Lanmanserver\Parameters
+    name: EnableForcedLogoff
+    data: 1
+    type: dword
+
+- name: "2.3.9.5 Ensure Microsoft network server Server SPN target name validation level is set to Accept if provided by client or higher. | MS Only"
+  when:
+    - rule_2_3_9_5
+    - is_domain_member
+
+  block:
+    - name: "2.3.9.5 Ensure Microsoft network server Server SPN target name validation level is set to Accept if provided by client or higher. | Apply Registry Setting | MS Only."
+      ansible.windows.win_regedit:
+        path: HKLM:\SYSTEM\Currentcontrolset\Services\LanManServer\Parameters
+        name: SMBServerNameHardeningLevel
+        data: "{{ win22cis_smb_server_name_hardening_level }}"
+        type: dword
+
+- name: "2.3.10.1 Ensure Network access Allow anonymous SID/Name translation is set to Disabled"
+  when: 
+    - rule_2_3_10_1
+    - not is_standalone
+
+  community.windows.win_security_policy:
+    section: System Access
+    key: LSAAnonymousNameLookup
+    value: 0
+
+- name: "2.3.10.2 Ensure Network access Do not allow anonymous enumeration of SAM accounts is set to Enabled MS only | Member Server"
+  when:
+    - rule_2_3_10_2
+    - is_domain_member
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa
+    name: RestrictAnonymousSAM
+    data: 1
+    type: dword
+
+- name: "2.3.10.3 Ensure Network access Do not allow anonymous enumeration of SAM accounts and shares is set to Enabled MS only | Member Server"
+  when:
+    - rule_2_3_10_3
+    - is_domain_member
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa
+    name: RestrictAnonymous
+    data: 1
+    type: dword
+
+- name: "2.3.10.4 Ensure Network access Do not allow storage of passwords and credentials for network authentication is set to Enabled"
+  when: 
+    - rule_2_3_10_4
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa
+    name: DisableDomainCreds
+    data: 1
+    type: dword
+
+- name: "2.3.10.5 Ensure Network access Let Everyone permissions apply to anonymous users is set to Disabled"
+  when: 
+    - rule_2_3_10_5
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa
+    name: EveryoneIncludesAnonymous
+    data: 0
+    type: dword
+
+- name: "2.3.10.6 Configure Network access Named Pipes that can be accessed anonymously DC only | Domain Controller"
+  when:
+    - rule_2_3_10_6
+    - is_domain_controller
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\LanManServer\Parameters
+    name: NullSessionPipes
+    data: ['LSARPC', 'NETLOGON', 'SAMR']
+    type: multistring
+
+- name: "2.3.10.7 Configure Network access Named Pipes that can be accessed anonymously MS only | Member Server"
+  when:
+    - rule_2_3_10_7
+    - is_domain_member
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\LanManServer\Parameters
+    name: NullSessionPipes
+    data: ""
+    type: multistring
+
+- name: "2.3.10.8 Configure Network access Remotely accessible registry paths"
+  when: 
+    - rule_2_3_10_8
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Securepipeservers\Winreg\AllowedExactpaths
+    name: "Machine"
+    data: [
+      'SYSTEM\CurrentControlSet\Control\ProductOptions',
+      'SYSTEM\CurrentControlSet\Control\Server Applications',
+      'SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+    ]
+    type: multistring
+
+- name: "2.3.10.9 Configure Network access Remotely accessible registry paths and sub-paths"
+  when: 
+    - rule_2_3_10_9
+    - not is_standalone
+
+  block:
+    - name: "2.3.10.9 Configure Network access Remotely accessible registry paths and sub-paths | Set Fact"
+      ansible.builtin.set_fact:
+        rule_2_3_10_9_remote_registry_paths: [
+          'SYSTEM\CurrentControlSet\Control\Print\Printers',
+          'SYSTEM\CurrentControlSet\Services\Eventlog',
+          'SOFTWARE\Microsoft\OLAP Server',
+          'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Print',
+          'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows',
+          'SYSTEM\CurrentControlSet\Control\ContentIndex',
+          'SYSTEM\CurrentControlSet\Control\Terminal Server',
+          'SYSTEM\CurrentControlSet\Control\Terminal Server\UserConfig',
+          'SYSTEM\CurrentControlSet\Control\Terminal Server\DefaultUserConfiguration',
+          'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib',
+          'SYSTEM\CurrentControlSet\Services\SysmonLog'
+        ]
+
+    - name: "2.3.10.9 Configure Network access Remotely accessible registry paths and sub-paths | Check if AD Certificate Services feature is installed."
+      community.windows.win_feature_info:
+        name: AD-Certificate
+      register: rule_2_3_10_9_adcs_feature
+
+    - name: "2.3.10.9 Configure Network access Remotely accessible registry paths and sub-paths | Add CertSvc to paths."
+      when: rule_2_3_10_9_adcs_feature.features[0].installed
+      ansible.builtin.set_fact:
+        rule_2_3_10_9_remote_registry_paths: "{{ rule_2_3_10_9_remote_registry_paths + ['SYSTEM\\CurrentControlSet\\Services\\CertSvc'] }}"
+
+    - name: "2.3.10.9 Check if WINS feature is installed."
+      community.windows.win_feature_info:
+        name: WINS
+      register: rule_2_3_10_9_wins_feature
+
+    - name: "2.3.10.9 Configure Network access Remotely accessible registry paths and sub-paths | Add WINS to paths."
+      when: rule_2_3_10_9_wins_feature.features[0].installed
+      ansible.builtin.set_fact:
+        rule_2_3_10_9_remote_registry_paths: "{{ rule_2_3_10_9_remote_registry_paths + ['SYSTEM\\CurrentControlSet\\Services\\WINS'] }}"
+
+    - name: "2.3.10.9 Configure Network access Remotely accessible registry paths and sub-paths | Apply Settings"
+      ansible.windows.win_regedit:
+        path: HKLM:\SYSTEM\Currentcontrolset\Control\Securepipeservers\Winreg\Allowedpaths
+        name: "Machine"
+        data: "{{ rule_2_3_10_9_remote_registry_paths }}"
+        type: multistring
+
+- name: "2.3.10.10 Configure Network access Remotely accessible registry paths and sub-paths | Ensure Network access Restrict anonymous access to Named Pipes and Shares is set to Enabled"
+  when: 
+    - rule_2_3_10_10
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Lanmanserver\Parameters
+    name: RestrictNullSessAccess
+    data: 1
+    type: dword
+
+- name: "2.3.10.11 Ensure Network access Restrict clients allowed to make remote calls to SAM is set to Administrators Remote Access Allow MS only | Member Server"
+  when:
+    - rule_2_3_10_11
+    - is_domain_member
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: RestrictRemoteSAM
+    data: "O:BAG:BAD:(A;;RC;;;BA)"
+    type: string
+
+- name: "2.3.10.12 Ensure Network access Shares that can be accessed anonymously is set to None"
+  when: 
+    - rule_2_3_10_12
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Services\Lanmanserver\Parameters
+    name: NullSessionShares
+    data: ""
+    type: multistring
+
+- name: "2.3.10.13 Ensure Network access Sharing and security model for local accounts is set to Classic - local users authenticate as themselves"
+  when: 
+    - rule_2_3_10_13
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa
+    name: ForceGuest
+    data: 0
+    type: dword
+
+- name: "2.3.11.1 Ensure Network security Allow Local System to use computer identity for NTLM is set to Enabled"
+  when: 
+    - rule_2_3_11_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa
+    name: UseMachineId
+    data: 1
+    type: dword
+
+- name: "2.3.11.2 Ensure Network security Allow LocalSystem NULL session fallback is set to Disabled"
+  when: 
+    - rule_2_3_11_2
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa\Msv1_0
+    name: AllowNullSessionFallback
+    data: 0
+    type: dword
+
+- name: "2.3.11.3 Ensure Network Security Allow PKU2U authentication requests to this computer to use online identities is set to Disabled"
+  when: 
+    - rule_2_3_11_3
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa\Pku2U
+    name: AllowOnlineID
+    data: 0
+    type: dword
+
+- name: "2.3.11.4 Ensure Network security Configure encryption types allowed for Kerberos is set to AES128 HMAC SHA1 AES256 HMAC SHA1 Future encryption types"
+  when: 
+    - rule_2_3_11_4
+    - not is_standalone
+
+  block:
+    - name: "2.3.11.4 Ensure Network security Configure encryption types allowed for Kerberos is set to AES128 HMAC SHA1 AES256 HMAC SHA1 Future encryption types | Legacy App Encryption Support"
+      when: win22cis_legacy_rc4_hmac_md5_support
+      ansible.windows.win_regedit:
+        path: HKLM:\Software\Microsoft\Windows\Currentversion\Policies\System\Kerberos\Parameters
+        name: SupportedEncryptionTypes
+        data: 2147483644
+        type: dword
+
+    - name: "2.3.11.4 Ensure Network security Configure encryption types allowed for Kerberos is set to AES128 HMAC SHA1 AES256 HMAC SHA1 Future encryption types | No Legacy App Encryption Support"
+      when: not win22cis_legacy_rc4_hmac_md5_support
+      ansible.windows.win_regedit:
+        path: HKLM:\Software\Microsoft\Windows\Currentversion\Policies\System\Kerberos\Parameters
+        name: SupportedEncryptionTypes
+        data: 2147483640
+        type: dword
+
+- name: "2.3.11.5 Ensure Network security Do not store LAN Manager hash value on next password change is set to Enabled"
+  when: 
+    - rule_2_3_11_5
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa
+    name: NoLMHash
+    data: 1
+    type: dword
+
+- name: "2.3.11.6 Ensure Network security Force logoff when logon hours expire is set to Enabled"
+  when: 
+    - rule_2_3_11_6
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanManServer\Parameters
+    name: EnableForcedLogOff
+    data: 1
+    type: dword
+
+- name: "2.3.11.7 nsure Network security LAN Manager authentication level is set to Send NTLMv2 response only. Refuse LM NTLM"
+  when: 
+    - rule_2_3_11_7
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa
+    name: LMCompatibilityLevel
+    data: 5
+    type: dword
+
+- name: "2.3.11.8 Ensure Network security LDAP client signing requirements is set to Negotiate signing or higher."
+  when: 
+    - rule_2_3_11_8
+    - not is_standalone
+
+  block:
+    - name: "2.3.11.8 Ensure Network security LDAP client signing requirements is set to Negotiate signing or higher. | Apply Variable To Registry."
+      when:
+        - win22cis_ldap_client_integrity == 1 or
+          win22cis_ldap_client_integrity == 2
+      ansible.windows.win_regedit:
+        path: HKLM:\SYSTEM\Currentcontrolset\Services\Ldap
+        name: LDAPClientIntegrity
+        data: "{{ win22cis_ldap_client_integrity }}"
+        type: dword
+
+- name: "2.3.11.9 Ensure Network security Minimum session security for NTLM SSP based including secure RPC clients is set to Require NTLMv2 session security Require 128-bit encryption"
+  when: 
+    - rule_2_3_11_9
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa\Msv1_0
+    name: NTLMMinClientSec
+    data: 537395200
+    type: dword
+
+- name: "2.3.11.10 Ensure Network security Minimum session security for NTLM SSP based including secure RPC servers is set to Require NTLMv2 session security Require 128-bit encryption"
+  when: 
+    - rule_2_3_11_10
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa\Msv1_0
+    name: NTLMMinServerSec
+    data: 537395200
+    type: dword
+
+- name: "2.3.11.11 Ensure Network security: Restrict NTLM: Audit Incoming NTLM Traffic is set to Enable auditing for all accounts"
+  when: 
+    - rule_2_3_11_11
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa\MSV1_0
+    name: AuditReceivingNTLMTraffic
+    data: 2
+    type: dword
+
+- name: "2.3.11.12 Ensure Network security: Restrict NTLM: Audit NTLM authentication in this domain is set to Enable all DC Only"
+  when:
+    - rule_2_3_11_12
+    - is_domain_controller
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters
+    name: AuditNTLMInDomain
+    data: 7
+    type: dword
+
+- name: "2.3.11.13 Ensure Network security: Restrict NTLM: Outgoing NTLM traffic to remote servers is set to Audit all or higher"
+  when: 
+    - rule_2_3_11_13
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Lsa\MSV1_0
+    name: RestrictSendingNTLMTraffic
+    data: 2
+    type: dword
+
+- name: "2.3.13.1 Ensure Shutdown Allow system to be shut down without having to log on is set to Disabled"
+  when: 
+    - win2rule_2_3_13_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: ShutdownWithoutLogon
+    data: 0
+    type: dword
+
+- name: "2.3.15.1 Ensure System objects Require case insensitivity for non-Windows subsystems is set to Enabled"
+  when: 
+    - rule_2_3_15_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Session Manager\Kernel
+    name: ObCaseInsensitive
+    data: 1
+    type: dword
+
+- name: "2.3.15.2 Ensure System objects Strengthen default permissions of internal system objects e.g. Symbolic Links is set to Enabled"
+  when: 
+    - rule_2_3_15_2
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\Currentcontrolset\Control\Session Manager
+    name: ProtectionMode
+    data: 1
+    type: dword
+
+- name: "2.3.17.1 Ensure User Account Control Admin Approval Mode for the Built-in Administrator account is set to Enabled"
+  when: 
+    - rule_2_3_17_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: FilterAdministratorToken
+    data: 1
+    type: dword
+
+- name: "2.3.17.2 | PATCH | Ensure User Account Control Behavior of the elevation prompt for administrators in Admin Approval Mode is set to Prompt for consent on the secure desktop"
+  when: 
+    - rule_2_3_17_2
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: ConsentPromptBehaviorAdmin
+    data: "{{ win22cis_consent_prompt_behavior_admin }}"
+    type: dword
+
+- name: "2.3.17.3 Ensure User Account Control Behavior of the elevation prompt for standard users is set to Automatically deny elevation requests"
+  when: 
+    - rule_2_3_17_3
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: ConsentPromptBehaviorUser
+    data: 0
+    type: dword
+
+- name: "2.3.17.4 Ensure User Account Control Detect application installations and prompt for elevation is set to Enabled"
+  when: 
+    - rule_2_3_17_4
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: EnableInstallerDetection
+    data: 1
+    type: dword
+
+- name: "2.3.17.5 Ensure User Account Control Only elevate UIAccess applications that are installed in secure locations is set to Enabled"
+  when: 
+    - rule_2_3_17_5
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: EnableSecureUIAPaths
+    data: 1
+    type: dword
+
+- name: "2.3.17.6 Ensure User Account Control Run all administrators in Admin Approval Mode is set to Enabled"
+  when: 
+    - rule_2_3_17_6
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: EnableLUA
+    data: 1
+    type: dword
+
+- name: "2.3.17.7 Ensure User Account Control Switch to the secure desktop when prompting for elevation is set to Enabled"
+  when: 
+    - rule_2_3_17_7
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: PromptOnSecureDesktop
+    data: 1
+    type: dword
+
+- name: "2.3.17.8 Ensure User Account Control Virtualize file and registry write failures to per-user locations is set to Enabled"
+  when: 
+    - rule_2_3_17_8
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\Currentversion\Policies\System
+    name: EnableVirtualization
+    data: 1
+    type: dword
