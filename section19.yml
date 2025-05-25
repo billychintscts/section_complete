@@ -1,0 +1,178 @@
+---
+- name: "Load Default And User Hives"
+  block:
+    - name: "Load Default User Hives"
+      ansible.windows.win_shell: REG LOAD HKU\DEFAULT C:\Users\Default\NTUSER.DAT
+      changed_when: false
+      failed_when: false
+
+    - name: "Pull all username and SIDs"
+      ansible.windows.win_shell: Get-CimInstance -Class Win32_UserAccount -Filter "SID LIKE 'S-1-5-%'" | ForEach-Object { $_.Name + " " + $_.SID }
+      changed_when: false
+      failed_when: false
+      register: prelim_all_users
+
+    - name: "Create results list fact for username and SIDs"
+      ansible.builtin.set_fact:
+        prelim_username_and_sid_results_list: "{{ prelim_all_users.stdout_lines | map('split', ' ') | list }}"
+
+    - name: "Load all user hives from username and SIDs list"
+      ansible.windows.win_shell: REG LOAD HKU\{{ item.1 }} C:\Users\{{ item.0 }}\NTUSER.DAT
+      changed_when: false
+      failed_when: false
+      loop: "{{ prelim_username_and_sid_results_list }}"
+
+    - name: "Retrieve current users SIDs from HKEY_USERS"
+      ansible.windows.win_shell: (Get-ChildItem "REGISTRY::HKEY_USERS").name | Where-Object {$_ -notlike "*_classes"}
+      changed_when: false
+      failed_when: false
+      register: prelim_current_users_loaded_hku
+
+    - name: "Load current users SIDs from HKEY_USERS"
+      ansible.builtin.set_fact:
+        prelim_hku_loaded_list: "{{ prelim_current_users_loaded_hku.stdout | regex_replace('HKEY_USERS\\\\', '') | split }}"
+
+- name: "19.5.1.1 Ensure Turn off toast notifications on the lock screen is set to Enabled"
+  when: 
+    - rule_19_5_1_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Policies\Microsoft\Windows\Currentversion\Pushnotifications
+    name: NoToastApplicationNotificationOnLockScreen
+    data: 1
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+- name: "19.6.6.1.1 Ensure Turn off Help Experience Improvement Program is set to Enabled"
+  when: 
+    - rule_19_6_6_1_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Policies\Microsoft\Assistance\Client\1.0
+    name: NoImplicitFeedback
+    data: 1
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+- name: "19.7.5.1 Ensure Do not preserve zone information in file attachments is set to Disabled"
+  when: 
+    - rule_19_7_5_1
+    - not is_standalone    
+
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments
+    name: SaveZoneInformation
+    data: 2
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+- name: "19.7.5.2 Ensure Notify antivirus programs when opening attachments is set to Enabled"
+  when: 
+    - rule_19_7_5_2
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Microsoft\Windows\Currentversion\Policies\Attachments
+    name: ScanWithAntiVirus
+    data: 3
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+- name: "19.7.8.1 Ensure Configure Windows spotlight on lock screen is set to Disabled"
+  when: 
+    - rule_19_7_8_1
+    - not is_standalone    
+
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Policies\Microsoft\Windows\CloudContent
+    name: ConfigureWindowsSpotlight
+    data: 2
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+- name: "19.7.8.2 Ensure Do not suggest third-party content in Windows spotlight is set to Enabled"
+  when: 
+    - rule_19_7_8_2
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Policies\Microsoft\Windows\CloudContent
+    name: DisableThirdPartySuggestions
+    data: 1
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+- name: "19.7.8.3 Ensure Do not use diagnostic data for tailored experiences is set to Enabled"
+  when: 
+    - rule_19_7_8_3
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Policies\Microsoft\Windows\CloudContent
+    name: DisableTailoredExperiencesWithDiagnosticData
+    data: 1
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+- name: "19.7.8.4 Ensure Turn off all Windows spotlight features is set to Enabled"
+  when: 
+    - rule_19_7_8_4
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Policies\Microsoft\Windows\CloudContent
+    name: DisableWindowsSpotlightFeatures
+    data: 1
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+- name: "19.7.8.5 Ensure Turn off Spotlight collection on Desktop is set to Enabled"
+  when: 
+    - rule_19_7_8_5
+    - not is_standalone
+ 
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Policies\Microsoft\Windows\CloudContent
+    name: DisableSpotlightCollectionOnDesktop
+    data: 1
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+- name: "19.7.26.1 Ensure Prevent users from sharing files within their profile is set to Enabled"
+  when: 
+    - rule_19_7_26_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Microsoft\Windows\Currentversion\Policies\Explorer
+    name: NoInplaceSharing
+    data: 1
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+- name: "19.7.42.1 Ensure Always install with elevated privileges is set to Disabled"
+  when: 
+    - rule_19_7_42_1
+    - not is_standalone
+
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Policies\Microsoft\Windows\Installer
+    name: AlwaysInstallElevated
+    data: 0
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
+
+
+- name: "19.7.44.2.1 Ensure Prevent Codec Download is set to Enabled"
+  when: 
+    - rule_19_7_44_2_1
+    - not is_standalone
+ 
+  ansible.windows.win_regedit:
+    path: HKU:\{{ item }}\SOFTWARE\Policies\Microsoft\Windowsmediaplayer
+    name: PreventCodecDownload
+    data: 1
+    type: dword
+  loop: "{{ prelim_hku_loaded_list }}"
