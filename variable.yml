@@ -696,12 +696,12 @@ win22cis_exchange_server_running: false
 # 2.3.1.4
 # win22cis_admin_username is the name the administrator account will be renamed to
 # Default: adminchangethis
-win22cis_admin_username: adminchangethis
+win22cis_admin_username: Administrator
 
 # 2.3.1.5
 # win22cis_guest_username is the name the guest account will be renamed to
 # Default: guestchangethis
-win22cis_guest_username: guestchangethis
+win22cis_guest_username: Guest
 
 # 2.3.6.5
 # win22cis_domain_member_maximum_password_age is the policy setting that determines the maximum allowable age for a
