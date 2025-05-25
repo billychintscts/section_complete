@@ -1,0 +1,17 @@
+---
+- name: "Check if system is a domain controller"
+  ansible.builtin.win_command: powershell -Command "(Get-WmiObject Win32_ComputerSystem).DomainRole"
+  register: domain_role_result
+
+- name: Determine if host is domain member
+  set_fact:
+    is_domain_member: "{{ domain_role_result.stdout | int in [1, 3] }}"
+
+- name: Determine if host is domain controller
+  set_fact:
+    is_domain_controller: "{{ domain_role_result.stdout | int in [4, 5] }}"
+
+- name: Determine if host is standalone
+  set_fact:
+    is_standalone: "{{ domain_role_result.stdout | int in [0, 2] }}"
+
